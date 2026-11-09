@@ -4,6 +4,7 @@ import time
 PORT = "COM6"
 BAUD_RATE = 9600
 
+ENABLE_COMMAND = 0x0A
 POLL_COMMAND = 0x07
 
 
@@ -77,16 +78,45 @@ try:
             sync_response.hex(" ").upper()
         )
 
-        # After SYNC the next sequence bit is 0
+        # After SYNC, next sequence bit is 0
         sequence = 0x00
+
+        # -------------------------
+        # ENABLE
+        # -------------------------
+
+        print("\nEnabling NV9...")
+
+        enable_packet = build_packet(
+            sequence,
+            ENABLE_COMMAND
+        )
+
+        print(
+            "ENABLE packet:",
+            enable_packet.hex(" ").upper()
+        )
+
+        nv9.write(enable_packet)
+        time.sleep(0.2)
+
+        enable_response = nv9.read_all()
+
+        print(
+            "ENABLE response:",
+            enable_response.hex(" ").upper()
+        )
+
+        # Toggle sequence after ENABLE
+        sequence = 0x80
+
+        # -------------------------
+        # POLLING
+        # -------------------------
 
         print("\nStarting NV9 polling...")
         print("Insert a banknote into the validator.")
         print("Press Ctrl+C to stop.\n")
-
-        # -------------------------
-        # POLL LOOP
-        # -------------------------
 
         while True:
 
@@ -96,13 +126,11 @@ try:
             )
 
             nv9.write(poll_packet)
-
             time.sleep(0.15)
 
             response = nv9.read_all()
 
             if response:
-
                 print(
                     "POLL:",
                     response.hex(" ").upper()
@@ -118,11 +146,9 @@ try:
 
 
 except KeyboardInterrupt:
-
     print("\nPolling stopped.")
 
 
 except serial.SerialException as error:
-
     print("Serial error:")
     print(error)
