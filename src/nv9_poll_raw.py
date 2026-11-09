@@ -4,6 +4,7 @@ import time
 PORT = "COM6"
 BAUD_RATE = 9600
 
+SET_INHIBITS_COMMAND = 0x02
 ENABLE_COMMAND = 0x0A
 POLL_COMMAND = 0x07
 
@@ -24,22 +25,24 @@ def ssp_crc(data):
     return crc
 
 
-def build_packet(seq_address, command):
+def build_packet(seq_address, command, data=b""):
+    payload = bytes([command]) + data
+
     body = bytes([
         seq_address,
-        0x01,
-        command
-    ])
+        len(payload)
+    ]) + payload
 
     crc = ssp_crc(body)
 
     crc_low = crc & 0xFF
     crc_high = (crc >> 8) & 0xFF
 
-    return bytes([0x7F]) + body + bytes([
-        crc_low,
-        crc_high
-    ])
+    return (
+        bytes([0x7F])
+        + body
+        + bytes([crc_low, crc_high])
+    )
 
 
 SYNC_PACKET = bytes.fromhex(
@@ -82,7 +85,38 @@ try:
         sequence = 0x00
 
         # -------------------------
-        # ENABLE
+        # SET INHIBITS
+        # Enable channels 1-16
+        # -------------------------
+
+        print("\nEnabling note channels 1-16...")
+
+        inhibit_packet = build_packet(
+            sequence,
+            SET_INHIBITS_COMMAND,
+            bytes([0xFF, 0xFF])
+        )
+
+        print(
+            "SET INHIBITS packet:",
+            inhibit_packet.hex(" ").upper()
+        )
+
+        nv9.write(inhibit_packet)
+        time.sleep(0.2)
+
+        inhibit_response = nv9.read_all()
+
+        print(
+            "SET INHIBITS response:",
+            inhibit_response.hex(" ").upper()
+        )
+
+        # Toggle sequence
+        sequence = 0x80
+
+        # -------------------------
+        # ENABLE VALIDATOR
         # -------------------------
 
         print("\nEnabling NV9...")
@@ -107,8 +141,8 @@ try:
             enable_response.hex(" ").upper()
         )
 
-        # Toggle sequence after ENABLE
-        sequence = 0x80
+        # Toggle sequence
+        sequence = 0x00
 
         # -------------------------
         # POLLING
@@ -136,7 +170,7 @@ try:
                     response.hex(" ").upper()
                 )
 
-            # Toggle sequence bit
+            # Toggle SSP sequence bit
             if sequence == 0x00:
                 sequence = 0x80
             else:
@@ -146,9 +180,11 @@ try:
 
 
 except KeyboardInterrupt:
+
     print("\nPolling stopped.")
 
 
 except serial.SerialException as error:
+
     print("Serial error:")
     print(error)
