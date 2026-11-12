@@ -24,6 +24,11 @@ try:
     print("Firmware:", firmware)
     print("Dataset:", dataset)
 
+    setup = validator.get_setup()
+
+    print("\nSetup response:")
+    print(setup["raw_hex"])
+
     session = TestSession(
         test_id="TEST-001",
         validator_model="NV9USB",

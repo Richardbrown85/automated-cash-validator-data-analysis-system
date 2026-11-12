@@ -9,14 +9,14 @@ class NV9Validator(BaseValidator):
     """
     Validator adapter for the NV9USB.
 
-    This class contains the NV9-specific SSP communication
-    while presenting the common BaseValidator interface
-    to the rest of the application.
+    Handles NV9-specific SSP communication while presenting
+    the common BaseValidator interface to the application.
     """
 
     SYNC_PACKET = bytes.fromhex("7F 80 01 11 65 82")
 
     SET_INHIBITS_COMMAND = 0x02
+    SETUP_REQUEST_COMMAND = 0x05
     POLL_COMMAND = 0x07
     DISABLE_COMMAND = 0x09
     ENABLE_COMMAND = 0x0A
@@ -127,7 +127,6 @@ class NV9Validator(BaseValidator):
 
         self.connected = True
 
-        # SYNC should be the first SSP command.
         self.serial_connection.write(
             self.SYNC_PACKET
         )
@@ -143,7 +142,6 @@ class NV9Validator(BaseValidator):
                 "NV9 did not respond correctly to SSP SYNC."
             )
 
-        # After SYNC, the next sequence bit should be 0.
         self.sequence = 0x00
 
         print(
@@ -216,12 +214,26 @@ class NV9Validator(BaseValidator):
             errors="replace"
         )
 
+    def get_setup(self):
+        response = self._send_command(
+            self.SETUP_REQUEST_COMMAND
+        )
+
+        if not self._response_ok(response):
+            raise RuntimeError(
+                "Could not read NV9 setup information."
+            )
+
+        return {
+            "raw": response,
+            "raw_hex": response.hex(" ").upper(),
+        }
+
     # --------------------------------------------------
     # Validator control
     # --------------------------------------------------
 
     def enable(self):
-        # Enable channels 1-16.
         inhibit_response = self._send_command(
             self.SET_INHIBITS_COMMAND,
             bytes([0xFF, 0xFF])
@@ -268,7 +280,7 @@ class NV9Validator(BaseValidator):
 
         response = self._send_command(
             self.POLL_COMMAND
-    )
+        )
 
         if not response:
             return None
@@ -277,4 +289,4 @@ class NV9Validator(BaseValidator):
             "raw": response,
             "raw_hex": response.hex(" ").upper(),
             "events": decode_poll_response(response),
-    }
+        }
