@@ -1,12 +1,11 @@
 import time
 
 from validators.nv9_validator import NV9Validator
+from core.test_session import TestSession
 from data_logging.event_logger import EventLogger
 
 
 validator = NV9Validator()
-
-logger = EventLogger("validator_events.csv")
 
 try:
     print("Attempting to connect to NV9...")
@@ -16,9 +15,31 @@ try:
     print("Connected:", validator.connected)
 
     print("\nValidator information:")
-    print("Serial:", validator.get_serial_number())
-    print("Firmware:", validator.get_firmware_version())
-    print("Dataset:", validator.get_dataset_version())
+
+    serial_number = validator.get_serial_number()
+    firmware = validator.get_firmware_version()
+    dataset = validator.get_dataset_version()
+
+    print("Serial:", serial_number)
+    print("Firmware:", firmware)
+    print("Dataset:", dataset)
+
+    session = TestSession(
+        test_id="TEST-001",
+        validator_model="NV9USB",
+        serial_number=serial_number,
+        firmware=firmware,
+        dataset=dataset,
+        operator="Richard",
+    )
+
+    logger = EventLogger(
+        "validator_events.csv",
+        session=session,
+    )
+
+    print("\nTest session created:")
+    print(session.as_dict())
 
     print("\nEnabling validator...")
 
@@ -34,21 +55,23 @@ try:
         result = validator.poll()
 
         if result:
-         print("POLL:", result["raw_hex"])
+            print("POLL:", result["raw_hex"])
 
-        for event in result["events"]:
-            print(
-                event["event_type"],
-                "Channel:",
-                event["channel"]
-            )
+            for event in result["events"]:
+                print(
+                    event["event_type"],
+                    "Channel:",
+                    event["channel"]
+                )
 
-            record = logger.log_event(event)
+                record = logger.log_event(event)
 
-            print(
-                "Logged:",
-                record["timestamp"]
-            )
+                print(
+                    "Logged:",
+                    record["timestamp"],
+                    "Test:",
+                    record["test_id"]
+                )
 
         time.sleep(0.1)
 
