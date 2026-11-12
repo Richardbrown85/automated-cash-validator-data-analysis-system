@@ -12,13 +12,26 @@ try:
 
     print("\nReading validator information...")
 
-    serial_number = validator.get_serial_number()
-    firmware = validator.get_firmware_version()
-    dataset = validator.get_dataset_version()
+    print("Serial:", validator.get_serial_number())
+    print("Firmware:", validator.get_firmware_version())
+    print("Dataset:", validator.get_dataset_version())
 
-    print("Serial:", serial_number)
-    print("Firmware:", firmware)
-    print("Dataset:", dataset)
+    print("\nEnabling validator...")
+
+    validator.enable()
+
+    print("Enabled:", validator.enabled)
+
+    print("\nPolling NV9...")
+
+    result = validator.poll()
+
+    print("Poll result:", result)
 
 finally:
-    validator.disconnect()
+    if validator.connected:
+        try:
+            if validator.enabled:
+                validator.disable()
+        finally:
+            validator.disconnect()
