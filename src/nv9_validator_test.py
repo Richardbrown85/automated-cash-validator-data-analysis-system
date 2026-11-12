@@ -1,9 +1,12 @@
 import time
 
 from validators.nv9_validator import NV9Validator
+from data_logging.event_logger import EventLogger
 
 
 validator = NV9Validator()
+
+logger = EventLogger("validator_events.csv")
 
 try:
     print("Attempting to connect to NV9...")
@@ -34,11 +37,18 @@ try:
          print("POLL:", result["raw_hex"])
 
         for event in result["events"]:
-         print(
-            event["event_type"],
-            "Channel:",
-            event["channel"]
-        )
+            print(
+                event["event_type"],
+                "Channel:",
+                event["channel"]
+            )
+
+            record = logger.log_event(event)
+
+            print(
+                "Logged:",
+                record["timestamp"]
+            )
 
         time.sleep(0.1)
 
