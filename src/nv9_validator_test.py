@@ -1,3 +1,5 @@
+import time
+
 from validators.nv9_validator import NV9Validator
 
 
@@ -10,8 +12,7 @@ try:
 
     print("Connected:", validator.connected)
 
-    print("\nReading validator information...")
-
+    print("\nValidator information:")
     print("Serial:", validator.get_serial_number())
     print("Firmware:", validator.get_firmware_version())
     print("Dataset:", validator.get_dataset_version())
@@ -22,11 +23,20 @@ try:
 
     print("Enabled:", validator.enabled)
 
-    print("\nPolling NV9...")
+    print("\nPolling started.")
+    print("Insert a banknote now.")
+    print("Press Ctrl+C to stop.\n")
 
-    result = validator.poll()
+    while True:
+        result = validator.poll()
 
-    print("Poll result:", result)
+        if result:
+            print("POLL:", result["raw_hex"])
+
+        time.sleep(0.1)
+
+except KeyboardInterrupt:
+    print("\nPolling stopped by user.")
 
 finally:
     if validator.connected:
