@@ -264,17 +264,17 @@ class NV9Validator(BaseValidator):
     # --------------------------------------------------
 
     def poll(self):
-    from protocols.ssp_event_decoder import decode_poll_response
+        from protocols.ssp_event_decoder import decode_poll_response
 
-    response = self._send_command(
-        self.POLL_COMMAND
+        response = self._send_command(
+            self.POLL_COMMAND
     )
 
-    if not response:
-        return None
+        if not response:
+            return None
 
-    return {
-        "raw": response,
-        "raw_hex": response.hex(" ").upper(),
-        "events": decode_poll_response(response),
+        return {
+            "raw": response,
+            "raw_hex": response.hex(" ").upper(),
+            "events": decode_poll_response(response),
     }
