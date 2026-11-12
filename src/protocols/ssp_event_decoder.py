@@ -48,12 +48,14 @@ def decode_poll_response(response):
         event_code = event_data[index]
 
         event = {
-            "event_code": f"{event_code:02X}",
             "event_type": EVENT_CODES.get(
                 event_code,
                 "UNKNOWN_EVENT"
             ),
+            "event_code": f"{event_code:02X}",
             "channel": None,
+            "value": None,
+            "currency": None,
             "raw_hex": response.hex(" ").upper(),
         }
 

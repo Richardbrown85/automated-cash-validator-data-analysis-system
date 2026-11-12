@@ -18,8 +18,4 @@ for hex_response in test_responses:
     events = decode_poll_response(response)
 
     for event in events:
-        print(
-            event["event_type"],
-            "Channel:",
-            event["channel"]
-        )
+        print(event)
