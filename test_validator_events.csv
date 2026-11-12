@@ -1,0 +1,2 @@
+timestamp,event_type,event_code,channel,value,currency,raw_hex
+2026-11-12T20:42:09.542,NOTE_CREDIT,EE,2,,,7F 00 04 F0 EE 02 CC E0 C2
