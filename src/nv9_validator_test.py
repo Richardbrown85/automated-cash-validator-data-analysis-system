@@ -31,7 +31,14 @@ try:
         result = validator.poll()
 
         if result:
-            print("POLL:", result["raw_hex"])
+         print("POLL:", result["raw_hex"])
+
+        for event in result["events"]:
+         print(
+            event["event_type"],
+            "Channel:",
+            event["channel"]
+        )
 
         time.sleep(0.1)
 
