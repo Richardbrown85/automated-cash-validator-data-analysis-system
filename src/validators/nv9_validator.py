@@ -62,7 +62,7 @@ class NV9Validator(BaseValidator):
 
         body = bytes([
             self.sequence,
-            len(payload)
+            len(payload),
         ]) + payload
 
         crc = self._ssp_crc(body)
@@ -88,7 +88,7 @@ class NV9Validator(BaseValidator):
 
         packet = self._build_packet(
             command,
-            data
+            data,
         )
 
         self.serial_connection.write(packet)
@@ -121,7 +121,7 @@ class NV9Validator(BaseValidator):
             bytesize=serial.EIGHTBITS,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_TWO,
-            timeout=1
+            timeout=1,
         )
 
         self.serial_connection.reset_input_buffer()
@@ -179,7 +179,7 @@ class NV9Validator(BaseValidator):
 
         return int.from_bytes(
             serial_bytes,
-            byteorder="big"
+            byteorder="big",
         )
 
     def get_firmware_version(self):
@@ -196,7 +196,7 @@ class NV9Validator(BaseValidator):
 
         return firmware_bytes.decode(
             "ascii",
-            errors="replace"
+            errors="replace",
         )
 
     def get_dataset_version(self):
@@ -213,8 +213,11 @@ class NV9Validator(BaseValidator):
 
         return dataset_bytes.decode(
             "ascii",
-            errors="replace"
+            errors="replace",
         )
+
+    def get_model_name(self):
+        return "NV9USB"
 
     def get_setup(self):
         response = self._send_command(
@@ -235,7 +238,7 @@ class NV9Validator(BaseValidator):
         setup = self.get_setup()
 
         parsed_setup = parse_setup_response(
-        setup["raw"]
+            setup["raw"]
         )
 
         self.channel_map = parsed_setup["channel_map"]
@@ -249,7 +252,7 @@ class NV9Validator(BaseValidator):
     def enable(self):
         inhibit_response = self._send_command(
             self.SET_INHIBITS_COMMAND,
-            bytes([0xFF, 0xFF])
+            bytes([0xFF, 0xFF]),
         )
 
         if not self._response_ok(inhibit_response):
@@ -307,7 +310,7 @@ class NV9Validator(BaseValidator):
                 event["currency"] = channel_details["currency"]
 
         return {
-        "raw": response,
-        "raw_hex": response.hex(" ").upper(),
-        "events": events,
+            "raw": response,
+            "raw_hex": response.hex(" ").upper(),
+            "events": events,
         }

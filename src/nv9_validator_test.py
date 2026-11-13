@@ -40,15 +40,22 @@ try:
             f"{details['currency']}"
         )
 
+    job_id = input("Enter Job ID: ").strip()
+    test_id = input("Enter Test ID: ").strip()
+    operator = input("Enter Operator Name: ").strip()
+
+    validator_model = validator.get_model_name()
+
     session = TestSession(
-        job_id="Reli103306",
-        test_id="Test 01",
-        validator_model="NV9USB",
+        job_id=job_id,
+        test_id=test_id,
+        validator_model=validator_model,
         serial_number=serial_number,
         firmware=firmware,
         dataset=dataset,
-        operator="Richard",
+        operator=operator,
     )
+
 
     logger = EventLogger(
         "validator_events.csv",
