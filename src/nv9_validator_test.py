@@ -77,7 +77,11 @@ try:
                 print(
                     event["event_type"],
                     "Channel:",
-                    event["channel"]
+                    event["channel"],
+                    "Value:",
+                    event["value"],
+                    "Currency:",
+                    event["currency"],
                 )
 
                 record = logger.log_event(event)
