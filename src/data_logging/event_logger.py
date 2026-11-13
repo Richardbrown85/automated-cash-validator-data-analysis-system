@@ -3,13 +3,28 @@ from datetime import datetime
 from pathlib import Path
 
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DATA_DIR = PROJECT_ROOT / "data"
+
+
 class EventLogger:
     def __init__(
         self,
-        filename="validator_events.csv",
+        filename=None,
         session=None,
     ):
-        self.filename = Path(filename)
+        DATA_DIR.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        if filename is None:
+            self.filename = (
+                DATA_DIR / "validator_events.csv"
+            )
+        else:
+            self.filename = Path(filename)
+
         self.session = session
 
         self.fieldnames = [
