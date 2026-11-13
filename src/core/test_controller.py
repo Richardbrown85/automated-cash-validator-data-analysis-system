@@ -68,7 +68,7 @@ class TestController:
         job_id,
         test_id,
         operator,
-        filename="validator_events.csv",
+        filename="None",
     ):
         if self.running:
             raise RuntimeError(
