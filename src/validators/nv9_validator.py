@@ -32,6 +32,7 @@ class NV9Validator(BaseValidator):
         self.serial_connection = None
         self.connected = False
         self.enabled = False
+        self.channel_map = {}
 
         # SSP sequence bit.
         # SYNC resets the next expected sequence to 0.
@@ -237,7 +238,9 @@ class NV9Validator(BaseValidator):
         setup["raw"]
         )
 
-        return parsed_setup["channel_map"]
+        self.channel_map = parsed_setup["channel_map"]
+
+        return self.channel_map
 
     # --------------------------------------------------
     # Validator control
@@ -292,11 +295,19 @@ class NV9Validator(BaseValidator):
             self.POLL_COMMAND
         )
 
-        if not response:
-            return None
+        events = decode_poll_response(response)
+
+        for event in events:
+            channel = event.get("channel")
+
+            if channel in self.channel_map:
+                channel_details = self.channel_map[channel]
+
+                event["value"] = channel_details["value"]
+                event["currency"] = channel_details["currency"]
 
         return {
-            "raw": response,
-            "raw_hex": response.hex(" ").upper(),
-            "events": decode_poll_response(response),
+        "raw": response,
+        "raw_hex": response.hex(" ").upper(),
+        "events": events,
         }
