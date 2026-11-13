@@ -41,7 +41,8 @@ try:
         )
 
     session = TestSession(
-        test_id="TEST-001",
+        job_id="Reli103306",
+        test_id="Test 01",
         validator_model="NV9USB",
         serial_number=serial_number,
         firmware=firmware,

@@ -4,6 +4,7 @@ from datetime import datetime
 class TestSession:
     def __init__(
         self,
+        job_id,
         test_id,
         validator_model,
         serial_number,
@@ -11,6 +12,7 @@ class TestSession:
         dataset,
         operator=None,
     ):
+        self.job_id = job_id
         self.test_id = test_id
         self.validator_model = validator_model
         self.serial_number = serial_number
@@ -24,6 +26,7 @@ class TestSession:
 
     def as_dict(self):
         return {
+            "job_id": self.job_id,
             "test_id": self.test_id,
             "test_start": self.start_time,
             "validator_model": self.validator_model,
