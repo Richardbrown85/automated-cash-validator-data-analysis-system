@@ -68,7 +68,7 @@ class TestController:
         job_id,
         test_id,
         operator,
-        filename="None",
+        filename=None,
     ):
         if self.running:
             raise RuntimeError(

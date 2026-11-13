@@ -18,10 +18,8 @@ class EventLogger:
             exist_ok=True,
         )
 
-        if filename is None:
-            self.filename = (
-                DATA_DIR / "validator_events.csv"
-            )
+        if filename is None or filename == "":
+            self.filename = DATA_DIR / "validator_events.csv"
         else:
             self.filename = Path(filename)
 
