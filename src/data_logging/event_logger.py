@@ -13,6 +13,7 @@ class EventLogger:
         self.session = session
 
         self.fieldnames = [
+            "job_id",
             "test_id",
             "test_start",
             "timestamp",
@@ -51,6 +52,7 @@ class EventLogger:
             session_data = self.session.as_dict()
 
         record = {
+            "job_id": session_data.get("job_id"),
             "test_id": session_data.get("test_id"),
             "test_start": session_data.get("test_start"),
             "timestamp": datetime.now().isoformat(
