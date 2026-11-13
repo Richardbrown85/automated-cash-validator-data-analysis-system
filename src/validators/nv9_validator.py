@@ -3,6 +3,7 @@ import time
 
 from .base_validator import BaseValidator
 from config.settings import SERIAL_PORT, BAUD_RATE
+from protocols.ssp_setup_parser import parse_setup_response
 
 
 class NV9Validator(BaseValidator):
@@ -228,6 +229,15 @@ class NV9Validator(BaseValidator):
             "raw": response,
             "raw_hex": response.hex(" ").upper(),
         }
+
+    def get_channel_map(self):
+        setup = self.get_setup()
+
+        parsed_setup = parse_setup_response(
+        setup["raw"]
+        )
+
+        return parsed_setup["channel_map"]
 
     # --------------------------------------------------
     # Validator control
