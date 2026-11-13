@@ -29,6 +29,17 @@ try:
     print("\nSetup response:")
     print(setup["raw_hex"])
 
+    channel_map = validator.get_channel_map()
+
+    print("\nChannel map:")
+
+    for channel, details in channel_map.items():
+        print(
+            f"Channel {channel}: "
+            f"{details['value']} "
+            f"{details['currency']}"
+        )
+
     session = TestSession(
         test_id="TEST-001",
         validator_model="NV9USB",
