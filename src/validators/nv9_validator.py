@@ -5,6 +5,7 @@ from .base_validator import BaseValidator
 from config.settings import SERIAL_PORT, BAUD_RATE
 from protocols.ssp_setup_parser import parse_setup_response
 from utils.serial_port_finder import find_validator_port
+from protocols.ssp_packet_validator import validate_ssp_packet
 
 
 class NV9Validator(BaseValidator):
@@ -88,10 +89,31 @@ class NV9Validator(BaseValidator):
         if not self.connected:
             raise RuntimeError("Validator is not connected.")
 
-        packet = self._build_packet(
-            command,
-            data,
-        )
+        packet = self._build_packet(command, data)
+
+        self.serial_connection.write(packet)
+
+        time.sleep(0.2)
+
+        response = self.serial_connection.read_all()
+
+        # Validate the packet before processing it.
+        try:
+            validate_ssp_packet(
+                response,
+                expected_sequence=self.sequence,
+            )
+        except ValueError as error:
+            raise RuntimeError(
+                f"Invalid SSP response for command "
+                f"0x{command:02X}: {error}. "
+                f"Raw response: {response.hex(' ').upper()}"
+            ) from error
+
+        # Only advance the sequence after valid reception.
+        self._toggle_sequence()
+
+        return response
 
         self.serial_connection.write(packet)
 
