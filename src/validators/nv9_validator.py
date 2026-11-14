@@ -4,6 +4,7 @@ import time
 from .base_validator import BaseValidator
 from config.settings import SERIAL_PORT, BAUD_RATE
 from protocols.ssp_setup_parser import parse_setup_response
+from utils.serial_port_finder import find_validator_port
 
 
 class NV9Validator(BaseValidator):
@@ -28,6 +29,7 @@ class NV9Validator(BaseValidator):
     def __init__(self, port=SERIAL_PORT, baud_rate=BAUD_RATE):
         self.port = port
         self.baud_rate = baud_rate
+        self.auto_detect_port = port is None
 
         self.serial_connection = None
         self.connected = False
@@ -114,6 +116,9 @@ class NV9Validator(BaseValidator):
     def connect(self):
         if self.connected:
             return
+
+        if self.auto_detect_port:
+            self.port = find_validator_port()
 
         self.serial_connection = serial.Serial(
             port=self.port,

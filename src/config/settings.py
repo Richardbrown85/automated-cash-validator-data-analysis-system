@@ -1,7 +1,8 @@
-from utils.serial_port_finder import find_validator_port
-
 VALIDATOR_TYPE = "NV9"
-SERIAL_PORT = find_validator_port()
+
+# None means automatically detect the COM port
+# when connecting to the validator.
+SERIAL_PORT = None
 
 BAUD_RATE = 9600
 DATA_BITS = 8
