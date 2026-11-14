@@ -139,43 +139,59 @@ class NV9Validator(BaseValidator):
         if self.connected:
             return
 
+        # Detect the COM port when connecting.
         if self.auto_detect_port:
             self.port = find_validator_port()
 
-        self.serial_connection = serial.Serial(
-            port=self.port,
-            baudrate=self.baud_rate,
-            bytesize=serial.EIGHTBITS,
-            parity=serial.PARITY_NONE,
-            stopbits=serial.STOPBITS_TWO,
-            timeout=1,
-        )
-
-        self.serial_connection.reset_input_buffer()
-        self.serial_connection.reset_output_buffer()
-
-        self.connected = True
-
-        self.serial_connection.write(
-            self.SYNC_PACKET
-        )
-
-        time.sleep(0.2)
-
-        response = self.serial_connection.read_all()
-
-        if not self._response_ok(response):
-            self.disconnect()
-
-            raise RuntimeError(
-                "NV9 did not respond correctly to SSP SYNC."
+        try:
+            self.serial_connection = serial.Serial(
+                port=self.port,
+                baudrate=self.baud_rate,
+                bytesize=serial.EIGHTBITS,
+                parity=serial.PARITY_NONE,
+                stopbits=serial.STOPBITS_TWO,
+                timeout=1,
             )
 
-        self.sequence = 0x00
+            self.serial_connection.reset_input_buffer()
+            self.serial_connection.reset_output_buffer()
 
-        print(
-            f"NV9 connected on {self.port}"
-        )
+            # Send SSP SYNC.
+            self.serial_connection.write(self.SYNC_PACKET)
+
+            time.sleep(0.2)
+
+            response = self.serial_connection.read_all()
+
+            # Validate the SYNC response.
+            try:
+                payload = validate_ssp_packet(
+                    response,
+                    expected_sequence=0x80,
+                )
+
+            except ValueError as error:
+                raise RuntimeError(
+                   f"Invalid NV9 SYNC response: {error}. "
+                   f"Raw: {response.hex(' ').upper()}"
+                ) from error
+
+            # Check the SSP OK response.
+            if not payload or payload[0] != 0xF0:
+                raise RuntimeError(
+                    "NV9 did not acknowledge SSP SYNC."
+                )
+
+            # SYNC succeeded.
+            self.sequence = 0x00
+            self.connected = True
+
+            print(f"NV9 connected on {self.port}")
+
+        except Exception:
+            # Close the serial connection if SYNC fails.
+            self.disconnect()
+            raise
 
     def disconnect(self):
         if self.serial_connection:
